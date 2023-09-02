@@ -22,7 +22,7 @@ var NotEnoughStake = errors.New("RICRegistry: provider does not have enough stak
 var AlreadyClaimed = errors.New("RICRegistry: rollup not in REQUESTED status or timeout not reached")
 var ChainIDNotExist = errors.New("RICRegistry: chainID does not exist")
 
-var BlockRetryInterval = time.Second * 5
+var BlockRetryInterval = time.Second * 1
 var BlockRetryLimit = 5
 var ErrFatalPolling = errors.New("listener block polling failed")
 
@@ -138,7 +138,6 @@ func (l *listener) pollBlocks() error {
 
 			// Sleep if the difference is less than BlockDelay; (latest - current) < BlockDelay
 			if big.NewInt(0).Sub(latestBlock, currentBlock).Cmp(l.blockConfirmations) == -1 {
-				l.log.Debug("Block not ready, will retry", "target", currentBlock, "latest", latestBlock)
 				time.Sleep(BlockRetryInterval)
 				continue
 			}
