@@ -20,12 +20,13 @@ var flags = []cli.Flag{
 }
 
 type Config struct {
-	Name     string            `json:"name"`
-	Id       uint8             `json:"id"`
-	Endpoint string            `json:"endpoint"`
-	From     string            `json:"from"`
-	Insecure bool              `json:"insecure"`
-	Opts     map[string]string `json:"opts"`
+	Name               string `json:"name"`
+	Id                 uint8  `json:"id"`
+	Endpoint           string `json:"endpoint"`
+	From               string `json:"from"`
+	Insecure           bool   `json:"insecure"`
+	KeystorePath       string `json:"keystorePath"`
+	RicRegistryAddress string `json:"ricRegistry"`
 }
 
 func readConfig(jsonCfg string) (*chainsCore.ChainConfig, error) {
@@ -40,13 +41,17 @@ func readConfig(jsonCfg string) (*chainsCore.ChainConfig, error) {
 		return nil, err
 	}
 
+	opts := make(map[string]string)
+	opts[ricEth.RicRegistryOpt] = cfg.RicRegistryAddress
+
 	return &chainsCore.ChainConfig{
-		Name:     cfg.Name,
-		Id:       msg.ChainId(cfg.Id),
-		Endpoint: cfg.Endpoint,
-		From:     cfg.From,
-		Insecure: cfg.Insecure,
-		Opts:     cfg.Opts,
+		Name:         cfg.Name,
+		Id:           msg.ChainId(cfg.Id),
+		Endpoint:     cfg.Endpoint,
+		From:         cfg.From,
+		KeystorePath: cfg.KeystorePath,
+		Insecure:     cfg.Insecure,
+		Opts:         opts,
 	}, nil
 }
 
@@ -56,7 +61,7 @@ func run(c *cli.Context) error {
 		return err
 	}
 
-	logger := log.Root().New("ric-listener", cfg.Name)
+	logger := log.Root().New("ric-service", cfg.Name)
 	s, err := ricEth.NewService(cfg, logger)
 	if err != nil {
 		return err
@@ -67,8 +72,8 @@ func run(c *cli.Context) error {
 
 func main() {
 	app := &cli.App{
-		Name:   "ric-listener",
-		Usage:  "RIC Listener",
+		Name:   "ric-service",
+		Usage:  "RIC service",
 		Flags:  flags,
 		Action: run,
 	}

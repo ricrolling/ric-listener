@@ -100,6 +100,7 @@ func parseChainConfig(chainCfg *core.ChainConfig) (*Config, error) {
 		delete(chainCfg.Opts, Erc20HandlerOpt)
 	}
 
+	// Check ricRegistryContract from configuration.
 	if contract, ok := chainCfg.Opts[RicRegistryOpt]; ok {
 		config.ricRegistryContract = common.HexToAddress(contract)
 		delete(chainCfg.Opts, RicRegistryOpt)
