@@ -4,6 +4,9 @@ import (
 	"fmt"
 	"math/big"
 	"strings"
+
+	"github.com/ChainSafe/chainbridge-utils/crypto/secp256k1"
+	"github.com/ethereum/go-ethereum/common/hexutil"
 )
 
 const (
@@ -38,4 +41,32 @@ func ParseUint256OrHex(value *string) (*big.Int, error) {
 
 	// Decimal number, parse it
 	return valueToBig(*value, decimalBase)
+}
+
+func padWithZeros(key []byte, targetLength int) []byte {
+	res := make([]byte, targetLength-len(key))
+	return append(res, key...)
+}
+
+func makeEthRing() map[string]*secp256k1.Keypair {
+	ring := map[string]*secp256k1.Keypair{}
+	for _, key := range Keys {
+		bz := padWithZeros([]byte(key), secp256k1.PrivateKeyLength)
+		kp, err := secp256k1.NewKeypairFromPrivateKey(bz)
+		if err != nil {
+			panic(err)
+		}
+		ring[key] = kp
+	}
+
+	return ring
+}
+
+func makeKey(privateKey string) (*secp256k1.Keypair, error) {
+	bz, err := hexutil.Decode(privateKey)
+	kp, err := secp256k1.NewKeypairFromPrivateKey(bz)
+	if err != nil {
+		panic(err)
+	}
+	return kp, nil
 }

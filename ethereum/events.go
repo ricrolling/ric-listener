@@ -4,7 +4,12 @@
 package ethereum
 
 import (
+	"encoding/json"
 	"math/big"
+	"os"
+	"os/exec"
+	"path/filepath"
+	"time"
 
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/core/types"
@@ -12,4 +17,94 @@ import (
 
 func (l *listener) handleRicRegistryRollUpRequested(chainId *big.Int, requester common.Address, timestamp *big.Int) (*types.Transaction, error) {
 	return l.ricRegistryContract.QueueRollup(l.conn.Opts(), chainId)
+}
+
+type L1Addresses struct {
+	SystemConfigProxy                 string `json:"SystemConfigProxy" validate:"required"`
+	L1ERC721Bridge                    string `json:"L1ERC721Bridge" validate:"required"`
+	L1CrossDomainMessengerProxy       string `json:"L1CrossDomainMessengerProxy" validate:"required"`
+	OptimismMintableERC20Factory      string `json:"OptimismMintableERC20Factory" validate:"required"`
+	L2OutputOracleProxy               string `json:"L2OutputOracleProxy" validate:"required"`
+	L1CrossDomainMessenger            string `json:"L1CrossDomainMessenger" validate:"required"`
+	ProxyAdmin                        string `json:"ProxyAdmin" validate:"required"`
+	OptimismPortalProxy               string `json:"OptimismPortalProxy" validate:"required"`
+	L2OutputOracle                    string `json:"L2OutputOracle" validate:"required"`
+	SystemConfig                      string `json:"SystemConfig" validate:"required"`
+	L1ERC721BridgeProxy               string `json:"L1ERC721BridgeProxy" validate:"required"`
+	DisputeGameFactory                string `json:"DisputeGameFactory" validate:"required"`
+	AddressManager                    string `json:"AddressManager" validate:"required"`
+	L1StandardBridge                  string `json:"L1StandardBridge" validate:"required"`
+	L1StandardBridgeProxy             string `json:"L1StandardBridgeProxy" validate:"required"`
+	OptimismMintableERC20FactoryProxy string `json:"OptimismMintableERC20FactoryProxy" validate:"required"`
+	OptimismPortal                    string `json:"OptimismPortal" validate:"required"`
+	DisputeGameFactoryProxy           string `json:"DisputeGameFactoryProxy" validate:"required"`
+}
+
+func (l *listener) handleRicRegistryRollUpQueued(chainId *big.Int) error {
+	l.log.Info("rollup queued.", "chainId", chainId)
+	workdir, err := os.MkdirTemp("/tmp", "rollup")
+
+	if err != nil {
+		l.log.Error("error creating temp dir", "err", err)
+		return err
+	}
+
+	go func() {
+		cmd := exec.Command("bash", "-c", "python", "rollup.py", "--workdir", workdir, "--chain_id", chainId.String())
+		l.log.Info("Starting roll up service", "cmd", cmd.String())
+		err := cmd.Run()
+		if err != nil {
+			l.log.Error("error running rollup script", "err", err)
+		}
+	}()
+
+	go func() {
+		file := filepath.Join(workdir, "addresses.json")
+		for {
+			if _, err := os.Stat(file); err == nil {
+				l.log.Info("addresses file found, reading...")
+				data, err := os.ReadFile(file)
+				if err != nil {
+					l.log.Error("error reading addresses file", "err", err)
+				}
+
+				var addresses L1Addresses
+				err = json.Unmarshal(data, &addresses)
+				if err != nil {
+					l.log.Error("error unmarshalling addresses file", "err", err)
+				}
+
+				l.log.Info("start building payload...")
+				payload := common.LeftPadBytes(big.NewInt(18*20).Bytes(), 32)
+				payload = append(payload, common.FromHex(addresses.SystemConfigProxy)...)
+				payload = append(payload, common.FromHex(addresses.L1ERC721Bridge)...)
+				payload = append(payload, common.FromHex(addresses.L1CrossDomainMessengerProxy)...)
+				payload = append(payload, common.FromHex(addresses.OptimismMintableERC20Factory)...)
+				payload = append(payload, common.FromHex(addresses.L2OutputOracleProxy)...)
+				payload = append(payload, common.FromHex(addresses.L1CrossDomainMessenger)...)
+				payload = append(payload, common.FromHex(addresses.ProxyAdmin)...)
+				payload = append(payload, common.FromHex(addresses.OptimismPortalProxy)...)
+				payload = append(payload, common.FromHex(addresses.L2OutputOracle)...)
+				payload = append(payload, common.FromHex(addresses.SystemConfig)...)
+				payload = append(payload, common.FromHex(addresses.L1ERC721BridgeProxy)...)
+				payload = append(payload, common.FromHex(addresses.DisputeGameFactory)...)
+				payload = append(payload, common.FromHex(addresses.AddressManager)...)
+				payload = append(payload, common.FromHex(addresses.L1StandardBridge)...)
+				payload = append(payload, common.FromHex(addresses.L1StandardBridgeProxy)...)
+				payload = append(payload, common.FromHex(addresses.OptimismMintableERC20FactoryProxy)...)
+				payload = append(payload, common.FromHex(addresses.OptimismPortal)...)
+				payload = append(payload, common.FromHex(addresses.DisputeGameFactoryProxy)...)
+				l.log.Info("payload built", "payload", payload)
+
+				l.newChainReqCh <- &newChainReq{
+					ChainId:     chainId,
+					L1Addresses: payload,
+				}
+				break
+			}
+			time.Sleep(5 * time.Second)
+		}
+	}()
+
+	return nil
 }

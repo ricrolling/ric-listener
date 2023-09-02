@@ -88,13 +88,6 @@ func parseChainConfig(chainCfg *core.ChainConfig) (*Config, error) {
 		egsSpeed:               "",
 	}
 
-	if contract, ok := chainCfg.Opts[BridgeOpt]; ok && contract != "" {
-		config.bridgeContract = common.HexToAddress(contract)
-		delete(chainCfg.Opts, BridgeOpt)
-	} else {
-		return nil, fmt.Errorf("must provide opts.bridge field for ethereum config")
-	}
-
 	if contract, ok := chainCfg.Opts[Erc20HandlerOpt]; ok {
 		config.erc20HandlerContract = common.HexToAddress(contract)
 		delete(chainCfg.Opts, Erc20HandlerOpt)

@@ -21,28 +21,31 @@ var flags = []cli.Flag{
 
 type Config struct {
 	Name               string `json:"name"`
-	Id                 uint8  `json:"id"`
+	Id                 uint32 `json:"id"`
 	Endpoint           string `json:"endpoint"`
 	From               string `json:"from"`
 	Insecure           bool   `json:"insecure"`
-	KeystorePath       string `json:"keystorePath"`
-	RicRegistryAddress string `json:"ricRegistry"`
+	KeystorePath       string `json:"keystore_path"`
+	BlockConfirmations string `json:"block_confirmations"`
+	RicRegistryAddress string `json:"ric_registry"`
 }
 
 func readConfig(jsonCfg string) (*chainsCore.ChainConfig, error) {
-	var cfg *Config
+	var cfg Config
 	data, err := os.ReadFile(jsonCfg)
 	if err != nil {
 		return nil, err
 	}
 
-	err = json.Unmarshal(data, cfg)
+	err = json.Unmarshal(data, &cfg)
 	if err != nil {
+		log.Error("Failed to unmarshal config", "err", err)
 		return nil, err
 	}
 
 	opts := make(map[string]string)
 	opts[ricEth.RicRegistryOpt] = cfg.RicRegistryAddress
+	opts[ricEth.BlockConfirmationsOpt] = cfg.BlockConfirmations
 
 	return &chainsCore.ChainConfig{
 		Name:         cfg.Name,

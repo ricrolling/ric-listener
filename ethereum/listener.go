@@ -5,16 +5,17 @@ import (
 	"errors"
 	"fmt"
 	"math/big"
+	"sync"
 	"time"
 
 	"github.com/ChainSafe/ChainBridge/chains"
 	chainsEth "github.com/ChainSafe/ChainBridge/chains/ethereum"
-	utils "github.com/ChainSafe/ChainBridge/shared/ethereum"
 	metrics "github.com/ChainSafe/chainbridge-utils/metrics/types"
 	"github.com/ChainSafe/log15"
 	eth "github.com/ethereum/go-ethereum"
 	"github.com/ethereum/go-ethereum/common"
 	ethcommon "github.com/ethereum/go-ethereum/common"
+	"github.com/ethereum/go-ethereum/crypto"
 )
 
 var NotEnoughStake = errors.New("RICRegistry: provider does not have enough stake")
@@ -36,6 +37,26 @@ type listener struct {
 	latestBlock         metrics.LatestBlock
 	metrics             *metrics.ChainMetrics
 	blockConfirmations  *big.Int
+	newChainReqCh       chan *newChainReq
+	wg                  sync.WaitGroup
+}
+
+type newChainReq struct {
+	ChainId     *big.Int
+	L1Addresses []byte
+}
+
+func (l *listener) workerLoop() {
+	defer l.wg.Done()
+	for {
+		select {
+		case req := <-l.newChainReqCh:
+			l.log.Info("Dispatching DeployRollup() Event.", "chainId", req.ChainId, "l1Addresses", req.L1Addresses)
+			go l.ricRegistryContract.DeployRollup(l.conn.Opts(), req.ChainId, req.L1Addresses)
+		case <-l.stop:
+			break
+		}
+	}
 }
 
 // NewListener creates and returns a listener
@@ -50,6 +71,7 @@ func NewListener(conn chainsEth.Connection, cfg *Config, log log15.Logger, stop 
 		latestBlock:        metrics.LatestBlock{LastUpdated: time.Now()},
 		metrics:            m,
 		blockConfirmations: cfg.blockConfirmations,
+		newChainReqCh:      make(chan *newChainReq, 100),
 	}
 }
 
@@ -67,12 +89,17 @@ func (l *listener) setRouter(r chains.Router) {
 func (l *listener) start() error {
 	l.log.Debug("Starting listener...")
 
+	l.wg.Add(1)
+	go l.workerLoop()
+
 	go func() {
 		err := l.pollBlocks()
 		if err != nil {
 			l.log.Error("Polling blocks failed", "err", err)
 		}
 	}()
+
+	l.wg.Wait()
 
 	return nil
 }
@@ -124,6 +151,13 @@ func (l *listener) pollBlocks() error {
 				continue
 			}
 
+			err = l.getRicRollupQueuedEvent(currentBlock)
+			if err != nil {
+				l.log.Error("Failed to get events for block", "block", currentBlock, "err", err)
+				retry--
+				continue
+			}
+
 			// Write to block store. Not a critical operation, no need to retry
 			if l.metrics != nil {
 				l.metrics.BlocksProcessed.Inc()
@@ -141,19 +175,32 @@ func (l *listener) pollBlocks() error {
 }
 
 func (l *listener) getRicRollupRequestedEvent(latestBlock *big.Int) error {
-	l.log.Debug("Querying for RIC Rollup Requested event", "block", latestBlock)
-	query := buildQuery(l.cfg.ricRegistryContract,
-		"rollupRequested(uint256,address,uint256)", latestBlock, latestBlock)
+	l.log.Info("Querying for RIC Rollup Requested event", "block", latestBlock)
+
+	// allLogs, err := l.conn.Client().FilterLogs(context.Background(), eth.FilterQuery{})
+	// l.log.Info("All logs", "logs", allLogs)
+
+	topic := []byte("rollupRequested(uint256,address,uint256)")
+	topicHash := crypto.Keccak256Hash(topic)
+	// l.log.Info("querying..", "topicHash", topicHash)
+	// l.log.Info(l.cfg.ricRegistryContract.String())
+	query := buildQuery(l.cfg.ricRegistryContract, topicHash, latestBlock, latestBlock)
+
 	logs, err := l.conn.Client().FilterLogs(context.Background(), query)
+
 	if err != nil {
 		return fmt.Errorf("unable to Filter Logs: %w", err)
 	}
+
+	// if len(logs) == 0 {
+	// 	l.log.Warn("No RIC Rollup Requested events found", "block", latestBlock)
+	// }
 
 	for _, log := range logs {
 		chain := log.Topics[1].Big()
 		addr := common.HexToAddress(log.Topics[2].Hex())
 		ts := log.Topics[3].Big()
-
+		// l.log.Info("Topic:", "chain", chain.String(), "addr", addr.String(), "ts", ts.String())
 		tx, err := l.handleRicRegistryRollUpRequested(chain, addr, ts)
 
 		if err == NotEnoughStake {
@@ -165,9 +212,32 @@ func (l *listener) getRicRollupRequestedEvent(latestBlock *big.Int) error {
 		} else if err == ChainIDNotExist {
 			l.log.Error("Chain ID does not exist", "chain", chain, "addr", addr, "ts", ts, "tx", tx)
 			return err
-		} else {
+		} else if err != nil {
 			return err
 		}
+		l.log.Info("tx", "tx", tx)
+	}
+
+	// TODO: spin it up.
+	return nil
+}
+
+func (l *listener) getRicRollupQueuedEvent(latestBlock *big.Int) error {
+	l.log.Info("Querying for RIC Rollup Queued event", "block", latestBlock)
+
+	topic := []byte("rollupQueued(uint256,address,uint256,uint256)")
+	topicHash := crypto.Keccak256Hash(topic)
+	query := buildQuery(l.cfg.ricRegistryContract, topicHash, latestBlock, latestBlock)
+
+	logs, err := l.conn.Client().FilterLogs(context.Background(), query)
+
+	if err != nil {
+		return fmt.Errorf("unable to Filter Logs: %w", err)
+	}
+
+	for _, log := range logs {
+		chain := log.Topics[1].Big()
+		l.handleRicRegistryRollUpQueued(chain)
 	}
 
 	// TODO: spin it up.
@@ -175,13 +245,13 @@ func (l *listener) getRicRollupRequestedEvent(latestBlock *big.Int) error {
 }
 
 // buildQuery constructs a query for the bridgeContract by hashing sig to get the event topic
-func buildQuery(contract ethcommon.Address, sig utils.EventSig, startBlock *big.Int, endBlock *big.Int) eth.FilterQuery {
+func buildQuery(contract ethcommon.Address, sig ethcommon.Hash, startBlock *big.Int, endBlock *big.Int) eth.FilterQuery {
 	query := eth.FilterQuery{
 		FromBlock: startBlock,
 		ToBlock:   endBlock,
 		Addresses: []ethcommon.Address{contract},
 		Topics: [][]ethcommon.Hash{
-			{sig.GetTopic()},
+			{sig},
 		},
 	}
 	return query

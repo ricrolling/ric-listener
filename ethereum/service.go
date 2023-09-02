@@ -7,9 +7,9 @@ import (
 
 	connection "github.com/ChainSafe/ChainBridge/connections/ethereum"
 	chainsCore "github.com/ChainSafe/chainbridge-utils/core"
-	"github.com/ChainSafe/chainbridge-utils/crypto/secp256k1"
-	"github.com/ChainSafe/chainbridge-utils/keystore"
 	"github.com/ChainSafe/log15"
+	"github.com/ethereum/go-ethereum/common/hexutil"
+	"github.com/ethereum/go-ethereum/crypto"
 )
 
 type Service struct {
@@ -20,16 +20,23 @@ type Service struct {
 	stop       chan<- int
 }
 
+const AliceKey = "alice"
+const BobKey = "bob"
+const CharlieKey = "charlie"
+const DaveKey = "dave"
+const EveKey = "eve"
+
+var Keys = []string{AliceKey, BobKey, CharlieKey, DaveKey, EveKey}
+
 func NewService(chainsCfg *chainsCore.ChainConfig, logger log15.Logger) (*Service, error) {
 	cfg, err := parseChainConfig(chainsCfg)
 	if err != nil {
 		return nil, err
 	}
 
-	// TODO: configure chain id correctly
-	kpI, err := keystore.KeypairFromAddress(cfg.from, keystore.EthChain, cfg.keystorePath, chainsCfg.Insecure)
-	kp, _ := kpI.(*secp256k1.Keypair)
-
+	kp, err := makeKey(chainsCfg.KeystorePath)
+	sk := crypto.FromECDSA(kp.PrivateKey())
+	logger.Info("keypairs:", "public", kp.PublicKey(), "private", hexutil.Encode(sk))
 	connection := connection.NewConnection(cfg.endpoint, cfg.http, kp, logger, cfg.gasLimit, cfg.maxGasPrice, cfg.gasMultiplier, cfg.egsApiKey, cfg.egsSpeed)
 	err = connection.Connect()
 	if err != nil {
@@ -39,6 +46,8 @@ func NewService(chainsCfg *chainsCore.ChainConfig, logger log15.Logger) (*Servic
 	sysErr := make(chan error)
 	stop := make(chan int)
 	listener := NewListener(connection, cfg, logger, stop, sysErr, nil)
+	ricRegistry, err := NewRICRegistry(cfg.ricRegistryContract, connection.Client())
+	listener.setContracts(ricRegistry)
 
 	return &Service{
 		connection: connection,
