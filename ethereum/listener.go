@@ -7,39 +7,35 @@ import (
 	"math/big"
 	"time"
 
-	"github.com/ChainSafe/ChainBridge/bindings/Bridge"
-	"github.com/ChainSafe/ChainBridge/bindings/ERC20Handler"
-	"github.com/ChainSafe/ChainBridge/bindings/ERC721Handler"
-	"github.com/ChainSafe/ChainBridge/bindings/GenericHandler"
 	"github.com/ChainSafe/ChainBridge/chains"
 	chainsEth "github.com/ChainSafe/ChainBridge/chains/ethereum"
 	utils "github.com/ChainSafe/ChainBridge/shared/ethereum"
 	metrics "github.com/ChainSafe/chainbridge-utils/metrics/types"
-	"github.com/ChainSafe/chainbridge-utils/msg"
 	"github.com/ChainSafe/log15"
 	eth "github.com/ethereum/go-ethereum"
-	"github.com/ethereum/go-ethereum/accounts/abi/bind"
+	"github.com/ethereum/go-ethereum/common"
 	ethcommon "github.com/ethereum/go-ethereum/common"
 )
+
+var NotEnoughStake = errors.New("RICRegistry: provider does not have enough stake")
+var AlreadyClaimed = errors.New("RICRegistry: rollup not in REQUESTED status or timeout not reached")
+var ChainIDNotExist = errors.New("RICRegistry: chainID does not exist")
 
 var BlockRetryInterval = time.Second * 5
 var BlockRetryLimit = 5
 var ErrFatalPolling = errors.New("listener block polling failed")
 
 type listener struct {
-	cfg                    Config
-	conn                   chainsEth.Connection
-	router                 chains.Router
-	bridgeContract         *Bridge.Bridge // instance of bound bridge contract
-	erc20HandlerContract   *ERC20Handler.ERC20Handler
-	erc721HandlerContract  *ERC721Handler.ERC721Handler
-	genericHandlerContract *GenericHandler.GenericHandler
-	log                    log15.Logger
-	stop                   <-chan int
-	sysErr                 chan<- error // Reports fatal error to core
-	latestBlock            metrics.LatestBlock
-	metrics                *metrics.ChainMetrics
-	blockConfirmations     *big.Int
+	cfg                 Config
+	conn                chainsEth.Connection
+	router              chains.Router
+	ricRegistryContract *RICRegistry
+	log                 log15.Logger
+	stop                <-chan int
+	sysErr              chan<- error // Reports fatal error to core
+	latestBlock         metrics.LatestBlock
+	metrics             *metrics.ChainMetrics
+	blockConfirmations  *big.Int
 }
 
 // NewListener creates and returns a listener
@@ -58,11 +54,8 @@ func NewListener(conn chainsEth.Connection, cfg *Config, log log15.Logger, stop 
 }
 
 // setContracts sets the listener with the appropriate contracts
-func (l *listener) setContracts(bridge *Bridge.Bridge, erc20Handler *ERC20Handler.ERC20Handler, erc721Handler *ERC721Handler.ERC721Handler, genericHandler *GenericHandler.GenericHandler) {
-	l.bridgeContract = bridge
-	l.erc20HandlerContract = erc20Handler
-	l.erc721HandlerContract = erc721Handler
-	l.genericHandlerContract = genericHandler
+func (l *listener) setContracts(ric *RICRegistry) {
+	l.ricRegistryContract = ric
 }
 
 // sets the router
@@ -124,7 +117,7 @@ func (l *listener) pollBlocks() error {
 			}
 
 			// Parse out events
-			err = l.getDepositEventsForBlock(currentBlock)
+			err = l.getRicRollupRequestedEvent(currentBlock)
 			if err != nil {
 				l.log.Error("Failed to get events for block", "block", currentBlock, "err", err)
 				retry--
@@ -147,50 +140,37 @@ func (l *listener) pollBlocks() error {
 	}
 }
 
-// getDepositEventsForBlock looks for the deposit event in the latest block
-func (l *listener) getDepositEventsForBlock(latestBlock *big.Int) error {
-	l.log.Debug("Querying block for deposit events", "block", latestBlock)
-	query := buildQuery(l.cfg.bridgeContract, utils.Deposit, latestBlock, latestBlock)
-
-	// querying for logs
+func (l *listener) getRicRollupRequestedEvent(latestBlock *big.Int) error {
+	l.log.Debug("Querying for RIC Rollup Requested event", "block", latestBlock)
+	query := buildQuery(l.cfg.ricRegistryContract,
+		"rollupRequested(uint256,address,uint256)", latestBlock, latestBlock)
 	logs, err := l.conn.Client().FilterLogs(context.Background(), query)
 	if err != nil {
 		return fmt.Errorf("unable to Filter Logs: %w", err)
 	}
 
-	// read through the log events and handle their deposit event if handler is recognized
 	for _, log := range logs {
-		var m msg.Message
-		destId := msg.ChainId(log.Topics[1].Big().Uint64())
-		rId := msg.ResourceIdFromSlice(log.Topics[2].Bytes())
-		nonce := msg.Nonce(log.Topics[3].Big().Uint64())
+		chain := log.Topics[1].Big()
+		addr := common.HexToAddress(log.Topics[2].Hex())
+		ts := log.Topics[3].Big()
 
-		addr, err := l.bridgeContract.ResourceIDToHandlerAddress(&bind.CallOpts{From: l.conn.Keypair().CommonAddress()}, rId)
-		if err != nil {
-			return fmt.Errorf("failed to get handler from resource ID %x", rId)
-		}
+		tx, err := l.handleRicRegistryRollUpRequested(chain, addr, ts)
 
-		if addr == l.cfg.erc20HandlerContract {
-			m, err = l.handleErc20DepositedEvent(destId, nonce)
-		} else if addr == l.cfg.erc721HandlerContract {
-			m, err = l.handleErc721DepositedEvent(destId, nonce)
-		} else if addr == l.cfg.genericHandlerContract {
-			m, err = l.handleGenericDepositedEvent(destId, nonce)
-		} else {
-			l.log.Error("event has unrecognized handler", "handler", addr.Hex())
-			return nil
-		}
-
-		if err != nil {
+		if err == NotEnoughStake {
+			l.log.Error("Not enough stake", "chain", chain, "addr", addr, "ts", ts, "tx", tx)
 			return err
-		}
-
-		err = l.router.Send(m)
-		if err != nil {
-			l.log.Error("subscription error: failed to route message", "err", err)
+		} else if err == AlreadyClaimed {
+			l.log.Error("Already claimed", "chain", chain, "addr", addr, "ts", ts, "tx", tx)
+			return err
+		} else if err == ChainIDNotExist {
+			l.log.Error("Chain ID does not exist", "chain", chain, "addr", addr, "ts", ts, "tx", tx)
+			return err
+		} else {
+			return err
 		}
 	}
 
+	// TODO: spin it up.
 	return nil
 }
 

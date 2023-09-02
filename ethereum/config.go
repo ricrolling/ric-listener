@@ -21,6 +21,7 @@ const DefaultGasMultiplier = 1
 // Chain specific options
 var (
 	BridgeOpt             = "bridge"
+	RicRegistryOpt        = "ricRegistry"
 	Erc20HandlerOpt       = "erc20Handler"
 	Erc721HandlerOpt      = "erc721Handler"
 	GenericHandlerOpt     = "genericHandler"
@@ -45,6 +46,7 @@ type Config struct {
 	blockstorePath         string
 	freshStart             bool // Disables loading from blockstore at start
 	bridgeContract         common.Address
+	ricRegistryContract    common.Address
 	erc20HandlerContract   common.Address
 	erc721HandlerContract  common.Address
 	genericHandlerContract common.Address
@@ -71,6 +73,7 @@ func parseChainConfig(chainCfg *core.ChainConfig) (*Config, error) {
 		blockstorePath:         chainCfg.BlockstorePath,
 		freshStart:             chainCfg.FreshStart,
 		bridgeContract:         utils.ZeroAddress,
+		ricRegistryContract:    utils.ZeroAddress,
 		erc20HandlerContract:   utils.ZeroAddress,
 		erc721HandlerContract:  utils.ZeroAddress,
 		genericHandlerContract: utils.ZeroAddress,
@@ -95,6 +98,11 @@ func parseChainConfig(chainCfg *core.ChainConfig) (*Config, error) {
 	if contract, ok := chainCfg.Opts[Erc20HandlerOpt]; ok {
 		config.erc20HandlerContract = common.HexToAddress(contract)
 		delete(chainCfg.Opts, Erc20HandlerOpt)
+	}
+
+	if contract, ok := chainCfg.Opts[RicRegistryOpt]; ok {
+		config.ricRegistryContract = common.HexToAddress(contract)
+		delete(chainCfg.Opts, RicRegistryOpt)
 	}
 
 	if contract, ok := chainCfg.Opts[Erc721HandlerOpt]; ok {
