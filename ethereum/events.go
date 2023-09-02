@@ -5,6 +5,7 @@ package ethereum
 
 import (
 	"encoding/json"
+	"fmt"
 	"math/big"
 	"os"
 	"os/exec"
@@ -49,60 +50,77 @@ func (l *listener) handleRicRegistryRollUpQueued(chainId *big.Int) error {
 		return err
 	}
 
+	interrupt := make(chan int)
+
 	go func() {
-		cmd := exec.Command("bash", "-c", "python", "rollup.py", "--workdir", workdir, "--chain_id", chainId.String())
+		shellCmd := fmt.Sprintf("python rollup.py --workdir %s --chain_id %d 2>&1", workdir, chainId.Uint64())
+		cmd := exec.Command("/bin/zsh", "-c", shellCmd)
 		l.log.Info("Starting roll up service", "cmd", cmd.String())
-		err := cmd.Run()
+		output, err := cmd.Output()
+		l.log.Info("cmd run output:", "output", string(output))
 		if err != nil {
 			l.log.Error("error running rollup script", "err", err)
 		}
+
+		l.log.Info("finished running rollup script")
+		close(interrupt)
 	}()
 
 	go func() {
 		file := filepath.Join(workdir, "addresses.json")
+		timer := time.NewTimer(5 * time.Second)
+		defer timer.Stop()
+
 		for {
-			if _, err := os.Stat(file); err == nil {
-				l.log.Info("addresses file found, reading...")
-				data, err := os.ReadFile(file)
-				if err != nil {
-					l.log.Error("error reading addresses file", "err", err)
-				}
+			select {
+			case <-l.stop:
+				return
+			case <-interrupt:
+				l.log.Warn("rollup service exited")
+				return
+			case <-timer.C:
+				if _, err := os.Stat(file); err == nil {
+					l.log.Info("addresses file found, reading...")
+					data, err := os.ReadFile(file)
+					if err != nil {
+						l.log.Error("error reading addresses file", "err", err)
+					}
 
-				var addresses L1Addresses
-				err = json.Unmarshal(data, &addresses)
-				if err != nil {
-					l.log.Error("error unmarshalling addresses file", "err", err)
-				}
+					var addresses L1Addresses
+					err = json.Unmarshal(data, &addresses)
+					if err != nil {
+						l.log.Error("error unmarshalling addresses file", "err", err)
+					}
 
-				l.log.Info("start building payload...")
-				payload := common.LeftPadBytes(big.NewInt(18*20).Bytes(), 32)
-				payload = append(payload, common.FromHex(addresses.SystemConfigProxy)...)
-				payload = append(payload, common.FromHex(addresses.L1ERC721Bridge)...)
-				payload = append(payload, common.FromHex(addresses.L1CrossDomainMessengerProxy)...)
-				payload = append(payload, common.FromHex(addresses.OptimismMintableERC20Factory)...)
-				payload = append(payload, common.FromHex(addresses.L2OutputOracleProxy)...)
-				payload = append(payload, common.FromHex(addresses.L1CrossDomainMessenger)...)
-				payload = append(payload, common.FromHex(addresses.ProxyAdmin)...)
-				payload = append(payload, common.FromHex(addresses.OptimismPortalProxy)...)
-				payload = append(payload, common.FromHex(addresses.L2OutputOracle)...)
-				payload = append(payload, common.FromHex(addresses.SystemConfig)...)
-				payload = append(payload, common.FromHex(addresses.L1ERC721BridgeProxy)...)
-				payload = append(payload, common.FromHex(addresses.DisputeGameFactory)...)
-				payload = append(payload, common.FromHex(addresses.AddressManager)...)
-				payload = append(payload, common.FromHex(addresses.L1StandardBridge)...)
-				payload = append(payload, common.FromHex(addresses.L1StandardBridgeProxy)...)
-				payload = append(payload, common.FromHex(addresses.OptimismMintableERC20FactoryProxy)...)
-				payload = append(payload, common.FromHex(addresses.OptimismPortal)...)
-				payload = append(payload, common.FromHex(addresses.DisputeGameFactoryProxy)...)
-				l.log.Info("payload built", "payload", payload)
+					l.log.Info("start building payload...")
+					payload := common.LeftPadBytes(big.NewInt(18*20).Bytes(), 32)
+					payload = append(payload, common.FromHex(addresses.SystemConfigProxy)...)
+					payload = append(payload, common.FromHex(addresses.L1ERC721Bridge)...)
+					payload = append(payload, common.FromHex(addresses.L1CrossDomainMessengerProxy)...)
+					payload = append(payload, common.FromHex(addresses.OptimismMintableERC20Factory)...)
+					payload = append(payload, common.FromHex(addresses.L2OutputOracleProxy)...)
+					payload = append(payload, common.FromHex(addresses.L1CrossDomainMessenger)...)
+					payload = append(payload, common.FromHex(addresses.ProxyAdmin)...)
+					payload = append(payload, common.FromHex(addresses.OptimismPortalProxy)...)
+					payload = append(payload, common.FromHex(addresses.L2OutputOracle)...)
+					payload = append(payload, common.FromHex(addresses.SystemConfig)...)
+					payload = append(payload, common.FromHex(addresses.L1ERC721BridgeProxy)...)
+					payload = append(payload, common.FromHex(addresses.DisputeGameFactory)...)
+					payload = append(payload, common.FromHex(addresses.AddressManager)...)
+					payload = append(payload, common.FromHex(addresses.L1StandardBridge)...)
+					payload = append(payload, common.FromHex(addresses.L1StandardBridgeProxy)...)
+					payload = append(payload, common.FromHex(addresses.OptimismMintableERC20FactoryProxy)...)
+					payload = append(payload, common.FromHex(addresses.OptimismPortal)...)
+					payload = append(payload, common.FromHex(addresses.DisputeGameFactoryProxy)...)
+					l.log.Info("payload built", "payload", payload)
 
-				l.newChainReqCh <- &newChainReq{
-					ChainId:     chainId,
-					L1Addresses: payload,
+					l.newChainReqCh <- &newChainReq{
+						ChainId:     chainId,
+						L1Addresses: payload,
+					}
+					return
 				}
-				break
 			}
-			time.Sleep(5 * time.Second)
 		}
 	}()
 

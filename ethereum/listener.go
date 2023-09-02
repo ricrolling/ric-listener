@@ -175,7 +175,7 @@ func (l *listener) pollBlocks() error {
 }
 
 func (l *listener) getRicRollupRequestedEvent(latestBlock *big.Int) error {
-	l.log.Info("Querying for RIC Rollup Requested event", "block", latestBlock)
+	// l.log.Info("Querying for RIC Rollup Requested event", "block", latestBlock)
 
 	// allLogs, err := l.conn.Client().FilterLogs(context.Background(), eth.FilterQuery{})
 	// l.log.Info("All logs", "logs", allLogs)
@@ -223,7 +223,7 @@ func (l *listener) getRicRollupRequestedEvent(latestBlock *big.Int) error {
 }
 
 func (l *listener) getRicRollupQueuedEvent(latestBlock *big.Int) error {
-	l.log.Info("Querying for RIC Rollup Queued event", "block", latestBlock)
+	// l.log.Info("Querying for RIC Rollup Queued event", "block", latestBlock)
 
 	topic := []byte("rollupQueued(uint256,address,uint256,uint256)")
 	topicHash := crypto.Keccak256Hash(topic)
