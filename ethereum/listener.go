@@ -48,10 +48,11 @@ type newChainReq struct {
 
 func (l *listener) workerLoop() {
 	defer l.wg.Done()
+	l.log.Info("Starting listener worker loop")
 	for {
 		select {
 		case req := <-l.newChainReqCh:
-			l.log.Info("Dispatching DeployRollup() Event.", "chainId", req.ChainId, "l1Addresses", req.L1Addresses)
+			l.log.Info("Dispatching DeployRollup() trainsaction.", "chainId", req.ChainId, "l1Addresses", req.L1Addresses)
 			go l.ricRegistryContract.DeployRollup(l.conn.Opts(), req.ChainId, req.L1Addresses)
 		case <-l.stop:
 			break
@@ -99,8 +100,6 @@ func (l *listener) start() error {
 		}
 	}()
 
-	l.wg.Wait()
-
 	return nil
 }
 
@@ -115,6 +114,7 @@ func (l *listener) pollBlocks() error {
 	for {
 		select {
 		case <-l.stop:
+			l.wg.Wait()
 			return errors.New("polling terminated")
 		default:
 			// No more retries, goto next block
