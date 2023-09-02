@@ -32,6 +32,7 @@ var (
 // RICRegistryStatus is an auto generated low-level Go binding around an user-defined struct.
 type RICRegistryStatus struct {
 	Status          uint8
+	Name            string
 	Provider        common.Address
 	QueuedTimestamp *big.Int
 	ChainID         *big.Int
@@ -40,7 +41,7 @@ type RICRegistryStatus struct {
 
 // RICRegistryMetaData contains all meta data concerning the RICRegistry contract.
 var RICRegistryMetaData = &bind.MetaData{
-	ABI: "[{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"_queueTimeout\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"_providerStakeAmount\",\"type\":\"uint256\"}],\"stateMutability\":\"nonpayable\",\"type\":\"constructor\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"address\",\"name\":\"provider\",\"type\":\"address\"},{\"indexed\":false,\"internalType\":\"address\",\"name\":\"slasher\",\"type\":\"address\"}],\"name\":\"providerSlashed\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"address\",\"name\":\"provider\",\"type\":\"address\"}],\"name\":\"providerStaked\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"address\",\"name\":\"provider\",\"type\":\"address\"}],\"name\":\"providerUnstaked\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"chainID\",\"type\":\"uint256\"},{\"indexed\":false,\"internalType\":\"address\",\"name\":\"provider\",\"type\":\"address\"}],\"name\":\"rollupActivated\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"chainID\",\"type\":\"uint256\"},{\"indexed\":false,\"internalType\":\"address\",\"name\":\"provider\",\"type\":\"address\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"requestedTimestamp\",\"type\":\"uint256\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"timeoutTimestamp\",\"type\":\"uint256\"}],\"name\":\"rollupQueued\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"chainID\",\"type\":\"uint256\"},{\"indexed\":false,\"internalType\":\"address\",\"name\":\"requester\",\"type\":\"address\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"timestamp\",\"type\":\"uint256\"}],\"name\":\"rollupRequested\",\"type\":\"event\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"name\":\"activatedRollupsL1Addresses\",\"outputs\":[{\"internalType\":\"bytes\",\"name\":\"\",\"type\":\"bytes\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"chainID_\",\"type\":\"uint256\"},{\"internalType\":\"bytes\",\"name\":\"l1Addresses_\",\"type\":\"bytes\"}],\"name\":\"deployRollup\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"chainID_\",\"type\":\"uint256\"}],\"name\":\"getRollupStatus\",\"outputs\":[{\"components\":[{\"internalType\":\"enumRICRegistry.RollupStatus\",\"name\":\"status\",\"type\":\"uint8\"},{\"internalType\":\"address\",\"name\":\"provider\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"queuedTimestamp\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"chainID\",\"type\":\"uint256\"},{\"internalType\":\"bytes\",\"name\":\"config\",\"type\":\"bytes\"}],\"internalType\":\"structRICRegistry.Status\",\"name\":\"\",\"type\":\"tuple\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}],\"name\":\"providerStake\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"providerStakeAmount\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"providerUnstake\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"chainID_\",\"type\":\"uint256\"}],\"name\":\"queueRollup\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"queueTimeout\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"chainID_\",\"type\":\"uint256\"},{\"internalType\":\"bytes\",\"name\":\"config\",\"type\":\"bytes\"}],\"name\":\"requestRollup\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"name\":\"rollupStatus\",\"outputs\":[{\"internalType\":\"enumRICRegistry.RollupStatus\",\"name\":\"status\",\"type\":\"uint8\"},{\"internalType\":\"address\",\"name\":\"provider\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"queuedTimestamp\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"chainID\",\"type\":\"uint256\"},{\"internalType\":\"bytes\",\"name\":\"config\",\"type\":\"bytes\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"stakeAsProvider\",\"outputs\":[],\"stateMutability\":\"payable\",\"type\":\"function\"}]",
+	ABI: "[{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"_queueTimeout\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"_providerStakeAmount\",\"type\":\"uint256\"}],\"stateMutability\":\"nonpayable\",\"type\":\"constructor\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"address\",\"name\":\"provider\",\"type\":\"address\"},{\"indexed\":true,\"internalType\":\"address\",\"name\":\"slasher\",\"type\":\"address\"}],\"name\":\"providerSlashed\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"address\",\"name\":\"provider\",\"type\":\"address\"}],\"name\":\"providerStaked\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"address\",\"name\":\"provider\",\"type\":\"address\"}],\"name\":\"providerUnstaked\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"uint256\",\"name\":\"chainID\",\"type\":\"uint256\"},{\"indexed\":true,\"internalType\":\"address\",\"name\":\"provider\",\"type\":\"address\"}],\"name\":\"rollupActivated\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"uint256\",\"name\":\"chainID\",\"type\":\"uint256\"},{\"indexed\":true,\"internalType\":\"address\",\"name\":\"provider\",\"type\":\"address\"},{\"indexed\":true,\"internalType\":\"uint256\",\"name\":\"requestedTimestamp\",\"type\":\"uint256\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"timeoutTimestamp\",\"type\":\"uint256\"}],\"name\":\"rollupQueued\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"uint256\",\"name\":\"chainID\",\"type\":\"uint256\"},{\"indexed\":true,\"internalType\":\"address\",\"name\":\"requester\",\"type\":\"address\"},{\"indexed\":true,\"internalType\":\"uint256\",\"name\":\"timestamp\",\"type\":\"uint256\"}],\"name\":\"rollupRequested\",\"type\":\"event\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"name\":\"activatedRollupsL1Addresses\",\"outputs\":[{\"internalType\":\"bytes\",\"name\":\"\",\"type\":\"bytes\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"chainID_\",\"type\":\"uint256\"},{\"internalType\":\"bytes\",\"name\":\"l1Addresses_\",\"type\":\"bytes\"}],\"name\":\"deployRollup\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"getProviders\",\"outputs\":[{\"internalType\":\"address[]\",\"name\":\"\",\"type\":\"address[]\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"chainID_\",\"type\":\"uint256\"}],\"name\":\"getRollupStatus\",\"outputs\":[{\"components\":[{\"internalType\":\"enumRICRegistry.RollupStatus\",\"name\":\"status\",\"type\":\"uint8\"},{\"internalType\":\"string\",\"name\":\"name\",\"type\":\"string\"},{\"internalType\":\"address\",\"name\":\"provider\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"queuedTimestamp\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"chainID\",\"type\":\"uint256\"},{\"internalType\":\"bytes\",\"name\":\"config\",\"type\":\"bytes\"}],\"internalType\":\"structRICRegistry.Status\",\"name\":\"\",\"type\":\"tuple\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"requestorAddr\",\"type\":\"address\"}],\"name\":\"getUserChainIDs\",\"outputs\":[{\"internalType\":\"uint256[]\",\"name\":\"\",\"type\":\"uint256[]\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}],\"name\":\"providerStake\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"providerStakeAmount\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"providerUnstake\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"name\":\"providers\",\"outputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"chainID_\",\"type\":\"uint256\"}],\"name\":\"queueRollup\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"queueTimeout\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"string\",\"name\":\"name\",\"type\":\"string\"},{\"internalType\":\"uint256\",\"name\":\"chainID_\",\"type\":\"uint256\"},{\"internalType\":\"bytes\",\"name\":\"config\",\"type\":\"bytes\"}],\"name\":\"requestRollup\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"name\":\"rollupStatus\",\"outputs\":[{\"internalType\":\"enumRICRegistry.RollupStatus\",\"name\":\"status\",\"type\":\"uint8\"},{\"internalType\":\"string\",\"name\":\"name\",\"type\":\"string\"},{\"internalType\":\"address\",\"name\":\"provider\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"queuedTimestamp\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"chainID\",\"type\":\"uint256\"},{\"internalType\":\"bytes\",\"name\":\"config\",\"type\":\"bytes\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"stakeAsProvider\",\"outputs\":[],\"stateMutability\":\"payable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"name\":\"userToRollupChainIDs\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"}]",
 }
 
 // RICRegistryABI is the input ABI used to generate the binding from.
@@ -220,9 +221,40 @@ func (_RICRegistry *RICRegistryCallerSession) ActivatedRollupsL1Addresses(arg0 *
 	return _RICRegistry.Contract.ActivatedRollupsL1Addresses(&_RICRegistry.CallOpts, arg0)
 }
 
+// GetProviders is a free data retrieval call binding the contract method 0xedc922a9.
+//
+// Solidity: function getProviders() view returns(address[])
+func (_RICRegistry *RICRegistryCaller) GetProviders(opts *bind.CallOpts) ([]common.Address, error) {
+	var out []interface{}
+	err := _RICRegistry.contract.Call(opts, &out, "getProviders")
+
+	if err != nil {
+		return *new([]common.Address), err
+	}
+
+	out0 := *abi.ConvertType(out[0], new([]common.Address)).(*[]common.Address)
+
+	return out0, err
+
+}
+
+// GetProviders is a free data retrieval call binding the contract method 0xedc922a9.
+//
+// Solidity: function getProviders() view returns(address[])
+func (_RICRegistry *RICRegistrySession) GetProviders() ([]common.Address, error) {
+	return _RICRegistry.Contract.GetProviders(&_RICRegistry.CallOpts)
+}
+
+// GetProviders is a free data retrieval call binding the contract method 0xedc922a9.
+//
+// Solidity: function getProviders() view returns(address[])
+func (_RICRegistry *RICRegistryCallerSession) GetProviders() ([]common.Address, error) {
+	return _RICRegistry.Contract.GetProviders(&_RICRegistry.CallOpts)
+}
+
 // GetRollupStatus is a free data retrieval call binding the contract method 0xc76ec393.
 //
-// Solidity: function getRollupStatus(uint256 chainID_) view returns((uint8,address,uint256,uint256,bytes))
+// Solidity: function getRollupStatus(uint256 chainID_) view returns((uint8,string,address,uint256,uint256,bytes))
 func (_RICRegistry *RICRegistryCaller) GetRollupStatus(opts *bind.CallOpts, chainID_ *big.Int) (RICRegistryStatus, error) {
 	var out []interface{}
 	err := _RICRegistry.contract.Call(opts, &out, "getRollupStatus", chainID_)
@@ -239,16 +271,47 @@ func (_RICRegistry *RICRegistryCaller) GetRollupStatus(opts *bind.CallOpts, chai
 
 // GetRollupStatus is a free data retrieval call binding the contract method 0xc76ec393.
 //
-// Solidity: function getRollupStatus(uint256 chainID_) view returns((uint8,address,uint256,uint256,bytes))
+// Solidity: function getRollupStatus(uint256 chainID_) view returns((uint8,string,address,uint256,uint256,bytes))
 func (_RICRegistry *RICRegistrySession) GetRollupStatus(chainID_ *big.Int) (RICRegistryStatus, error) {
 	return _RICRegistry.Contract.GetRollupStatus(&_RICRegistry.CallOpts, chainID_)
 }
 
 // GetRollupStatus is a free data retrieval call binding the contract method 0xc76ec393.
 //
-// Solidity: function getRollupStatus(uint256 chainID_) view returns((uint8,address,uint256,uint256,bytes))
+// Solidity: function getRollupStatus(uint256 chainID_) view returns((uint8,string,address,uint256,uint256,bytes))
 func (_RICRegistry *RICRegistryCallerSession) GetRollupStatus(chainID_ *big.Int) (RICRegistryStatus, error) {
 	return _RICRegistry.Contract.GetRollupStatus(&_RICRegistry.CallOpts, chainID_)
+}
+
+// GetUserChainIDs is a free data retrieval call binding the contract method 0x8c653874.
+//
+// Solidity: function getUserChainIDs(address requestorAddr) view returns(uint256[])
+func (_RICRegistry *RICRegistryCaller) GetUserChainIDs(opts *bind.CallOpts, requestorAddr common.Address) ([]*big.Int, error) {
+	var out []interface{}
+	err := _RICRegistry.contract.Call(opts, &out, "getUserChainIDs", requestorAddr)
+
+	if err != nil {
+		return *new([]*big.Int), err
+	}
+
+	out0 := *abi.ConvertType(out[0], new([]*big.Int)).(*[]*big.Int)
+
+	return out0, err
+
+}
+
+// GetUserChainIDs is a free data retrieval call binding the contract method 0x8c653874.
+//
+// Solidity: function getUserChainIDs(address requestorAddr) view returns(uint256[])
+func (_RICRegistry *RICRegistrySession) GetUserChainIDs(requestorAddr common.Address) ([]*big.Int, error) {
+	return _RICRegistry.Contract.GetUserChainIDs(&_RICRegistry.CallOpts, requestorAddr)
+}
+
+// GetUserChainIDs is a free data retrieval call binding the contract method 0x8c653874.
+//
+// Solidity: function getUserChainIDs(address requestorAddr) view returns(uint256[])
+func (_RICRegistry *RICRegistryCallerSession) GetUserChainIDs(requestorAddr common.Address) ([]*big.Int, error) {
+	return _RICRegistry.Contract.GetUserChainIDs(&_RICRegistry.CallOpts, requestorAddr)
 }
 
 // ProviderStake is a free data retrieval call binding the contract method 0x13bd0523.
@@ -313,6 +376,37 @@ func (_RICRegistry *RICRegistryCallerSession) ProviderStakeAmount() (*big.Int, e
 	return _RICRegistry.Contract.ProviderStakeAmount(&_RICRegistry.CallOpts)
 }
 
+// Providers is a free data retrieval call binding the contract method 0x50f3fc81.
+//
+// Solidity: function providers(uint256 ) view returns(address)
+func (_RICRegistry *RICRegistryCaller) Providers(opts *bind.CallOpts, arg0 *big.Int) (common.Address, error) {
+	var out []interface{}
+	err := _RICRegistry.contract.Call(opts, &out, "providers", arg0)
+
+	if err != nil {
+		return *new(common.Address), err
+	}
+
+	out0 := *abi.ConvertType(out[0], new(common.Address)).(*common.Address)
+
+	return out0, err
+
+}
+
+// Providers is a free data retrieval call binding the contract method 0x50f3fc81.
+//
+// Solidity: function providers(uint256 ) view returns(address)
+func (_RICRegistry *RICRegistrySession) Providers(arg0 *big.Int) (common.Address, error) {
+	return _RICRegistry.Contract.Providers(&_RICRegistry.CallOpts, arg0)
+}
+
+// Providers is a free data retrieval call binding the contract method 0x50f3fc81.
+//
+// Solidity: function providers(uint256 ) view returns(address)
+func (_RICRegistry *RICRegistryCallerSession) Providers(arg0 *big.Int) (common.Address, error) {
+	return _RICRegistry.Contract.Providers(&_RICRegistry.CallOpts, arg0)
+}
+
 // QueueTimeout is a free data retrieval call binding the contract method 0x6d2ddb0c.
 //
 // Solidity: function queueTimeout() view returns(uint256)
@@ -346,9 +440,10 @@ func (_RICRegistry *RICRegistryCallerSession) QueueTimeout() (*big.Int, error) {
 
 // RollupStatus is a free data retrieval call binding the contract method 0x9d29ca27.
 //
-// Solidity: function rollupStatus(uint256 ) view returns(uint8 status, address provider, uint256 queuedTimestamp, uint256 chainID, bytes config)
+// Solidity: function rollupStatus(uint256 ) view returns(uint8 status, string name, address provider, uint256 queuedTimestamp, uint256 chainID, bytes config)
 func (_RICRegistry *RICRegistryCaller) RollupStatus(opts *bind.CallOpts, arg0 *big.Int) (struct {
 	Status          uint8
+	Name            string
 	Provider        common.Address
 	QueuedTimestamp *big.Int
 	ChainID         *big.Int
@@ -359,6 +454,7 @@ func (_RICRegistry *RICRegistryCaller) RollupStatus(opts *bind.CallOpts, arg0 *b
 
 	outstruct := new(struct {
 		Status          uint8
+		Name            string
 		Provider        common.Address
 		QueuedTimestamp *big.Int
 		ChainID         *big.Int
@@ -369,10 +465,11 @@ func (_RICRegistry *RICRegistryCaller) RollupStatus(opts *bind.CallOpts, arg0 *b
 	}
 
 	outstruct.Status = *abi.ConvertType(out[0], new(uint8)).(*uint8)
-	outstruct.Provider = *abi.ConvertType(out[1], new(common.Address)).(*common.Address)
-	outstruct.QueuedTimestamp = *abi.ConvertType(out[2], new(*big.Int)).(**big.Int)
-	outstruct.ChainID = *abi.ConvertType(out[3], new(*big.Int)).(**big.Int)
-	outstruct.Config = *abi.ConvertType(out[4], new([]byte)).(*[]byte)
+	outstruct.Name = *abi.ConvertType(out[1], new(string)).(*string)
+	outstruct.Provider = *abi.ConvertType(out[2], new(common.Address)).(*common.Address)
+	outstruct.QueuedTimestamp = *abi.ConvertType(out[3], new(*big.Int)).(**big.Int)
+	outstruct.ChainID = *abi.ConvertType(out[4], new(*big.Int)).(**big.Int)
+	outstruct.Config = *abi.ConvertType(out[5], new([]byte)).(*[]byte)
 
 	return *outstruct, err
 
@@ -380,9 +477,10 @@ func (_RICRegistry *RICRegistryCaller) RollupStatus(opts *bind.CallOpts, arg0 *b
 
 // RollupStatus is a free data retrieval call binding the contract method 0x9d29ca27.
 //
-// Solidity: function rollupStatus(uint256 ) view returns(uint8 status, address provider, uint256 queuedTimestamp, uint256 chainID, bytes config)
+// Solidity: function rollupStatus(uint256 ) view returns(uint8 status, string name, address provider, uint256 queuedTimestamp, uint256 chainID, bytes config)
 func (_RICRegistry *RICRegistrySession) RollupStatus(arg0 *big.Int) (struct {
 	Status          uint8
+	Name            string
 	Provider        common.Address
 	QueuedTimestamp *big.Int
 	ChainID         *big.Int
@@ -393,15 +491,47 @@ func (_RICRegistry *RICRegistrySession) RollupStatus(arg0 *big.Int) (struct {
 
 // RollupStatus is a free data retrieval call binding the contract method 0x9d29ca27.
 //
-// Solidity: function rollupStatus(uint256 ) view returns(uint8 status, address provider, uint256 queuedTimestamp, uint256 chainID, bytes config)
+// Solidity: function rollupStatus(uint256 ) view returns(uint8 status, string name, address provider, uint256 queuedTimestamp, uint256 chainID, bytes config)
 func (_RICRegistry *RICRegistryCallerSession) RollupStatus(arg0 *big.Int) (struct {
 	Status          uint8
+	Name            string
 	Provider        common.Address
 	QueuedTimestamp *big.Int
 	ChainID         *big.Int
 	Config          []byte
 }, error) {
 	return _RICRegistry.Contract.RollupStatus(&_RICRegistry.CallOpts, arg0)
+}
+
+// UserToRollupChainIDs is a free data retrieval call binding the contract method 0x52732edb.
+//
+// Solidity: function userToRollupChainIDs(address , uint256 ) view returns(uint256)
+func (_RICRegistry *RICRegistryCaller) UserToRollupChainIDs(opts *bind.CallOpts, arg0 common.Address, arg1 *big.Int) (*big.Int, error) {
+	var out []interface{}
+	err := _RICRegistry.contract.Call(opts, &out, "userToRollupChainIDs", arg0, arg1)
+
+	if err != nil {
+		return *new(*big.Int), err
+	}
+
+	out0 := *abi.ConvertType(out[0], new(*big.Int)).(**big.Int)
+
+	return out0, err
+
+}
+
+// UserToRollupChainIDs is a free data retrieval call binding the contract method 0x52732edb.
+//
+// Solidity: function userToRollupChainIDs(address , uint256 ) view returns(uint256)
+func (_RICRegistry *RICRegistrySession) UserToRollupChainIDs(arg0 common.Address, arg1 *big.Int) (*big.Int, error) {
+	return _RICRegistry.Contract.UserToRollupChainIDs(&_RICRegistry.CallOpts, arg0, arg1)
+}
+
+// UserToRollupChainIDs is a free data retrieval call binding the contract method 0x52732edb.
+//
+// Solidity: function userToRollupChainIDs(address , uint256 ) view returns(uint256)
+func (_RICRegistry *RICRegistryCallerSession) UserToRollupChainIDs(arg0 common.Address, arg1 *big.Int) (*big.Int, error) {
+	return _RICRegistry.Contract.UserToRollupChainIDs(&_RICRegistry.CallOpts, arg0, arg1)
 }
 
 // DeployRollup is a paid mutator transaction binding the contract method 0xefe30aba.
@@ -467,25 +597,25 @@ func (_RICRegistry *RICRegistryTransactorSession) QueueRollup(chainID_ *big.Int)
 	return _RICRegistry.Contract.QueueRollup(&_RICRegistry.TransactOpts, chainID_)
 }
 
-// RequestRollup is a paid mutator transaction binding the contract method 0x96832d07.
+// RequestRollup is a paid mutator transaction binding the contract method 0xf725587c.
 //
-// Solidity: function requestRollup(uint256 chainID_, bytes config) returns()
-func (_RICRegistry *RICRegistryTransactor) RequestRollup(opts *bind.TransactOpts, chainID_ *big.Int, config []byte) (*types.Transaction, error) {
-	return _RICRegistry.contract.Transact(opts, "requestRollup", chainID_, config)
+// Solidity: function requestRollup(string name, uint256 chainID_, bytes config) returns()
+func (_RICRegistry *RICRegistryTransactor) RequestRollup(opts *bind.TransactOpts, name string, chainID_ *big.Int, config []byte) (*types.Transaction, error) {
+	return _RICRegistry.contract.Transact(opts, "requestRollup", name, chainID_, config)
 }
 
-// RequestRollup is a paid mutator transaction binding the contract method 0x96832d07.
+// RequestRollup is a paid mutator transaction binding the contract method 0xf725587c.
 //
-// Solidity: function requestRollup(uint256 chainID_, bytes config) returns()
-func (_RICRegistry *RICRegistrySession) RequestRollup(chainID_ *big.Int, config []byte) (*types.Transaction, error) {
-	return _RICRegistry.Contract.RequestRollup(&_RICRegistry.TransactOpts, chainID_, config)
+// Solidity: function requestRollup(string name, uint256 chainID_, bytes config) returns()
+func (_RICRegistry *RICRegistrySession) RequestRollup(name string, chainID_ *big.Int, config []byte) (*types.Transaction, error) {
+	return _RICRegistry.Contract.RequestRollup(&_RICRegistry.TransactOpts, name, chainID_, config)
 }
 
-// RequestRollup is a paid mutator transaction binding the contract method 0x96832d07.
+// RequestRollup is a paid mutator transaction binding the contract method 0xf725587c.
 //
-// Solidity: function requestRollup(uint256 chainID_, bytes config) returns()
-func (_RICRegistry *RICRegistryTransactorSession) RequestRollup(chainID_ *big.Int, config []byte) (*types.Transaction, error) {
-	return _RICRegistry.Contract.RequestRollup(&_RICRegistry.TransactOpts, chainID_, config)
+// Solidity: function requestRollup(string name, uint256 chainID_, bytes config) returns()
+func (_RICRegistry *RICRegistryTransactorSession) RequestRollup(name string, chainID_ *big.Int, config []byte) (*types.Transaction, error) {
+	return _RICRegistry.Contract.RequestRollup(&_RICRegistry.TransactOpts, name, chainID_, config)
 }
 
 // StakeAsProvider is a paid mutator transaction binding the contract method 0x8c374073.
@@ -585,10 +715,19 @@ type RICRegistryProviderSlashed struct {
 
 // FilterProviderSlashed is a free log retrieval operation binding the contract event 0x6224637401e13f0bde2c33c63b3f7b896286f5f25c031feced5a2a536b5d4a1a.
 //
-// Solidity: event providerSlashed(address provider, address slasher)
-func (_RICRegistry *RICRegistryFilterer) FilterProviderSlashed(opts *bind.FilterOpts) (*RICRegistryProviderSlashedIterator, error) {
+// Solidity: event providerSlashed(address indexed provider, address indexed slasher)
+func (_RICRegistry *RICRegistryFilterer) FilterProviderSlashed(opts *bind.FilterOpts, provider []common.Address, slasher []common.Address) (*RICRegistryProviderSlashedIterator, error) {
 
-	logs, sub, err := _RICRegistry.contract.FilterLogs(opts, "providerSlashed")
+	var providerRule []interface{}
+	for _, providerItem := range provider {
+		providerRule = append(providerRule, providerItem)
+	}
+	var slasherRule []interface{}
+	for _, slasherItem := range slasher {
+		slasherRule = append(slasherRule, slasherItem)
+	}
+
+	logs, sub, err := _RICRegistry.contract.FilterLogs(opts, "providerSlashed", providerRule, slasherRule)
 	if err != nil {
 		return nil, err
 	}
@@ -597,10 +736,19 @@ func (_RICRegistry *RICRegistryFilterer) FilterProviderSlashed(opts *bind.Filter
 
 // WatchProviderSlashed is a free log subscription operation binding the contract event 0x6224637401e13f0bde2c33c63b3f7b896286f5f25c031feced5a2a536b5d4a1a.
 //
-// Solidity: event providerSlashed(address provider, address slasher)
-func (_RICRegistry *RICRegistryFilterer) WatchProviderSlashed(opts *bind.WatchOpts, sink chan<- *RICRegistryProviderSlashed) (event.Subscription, error) {
+// Solidity: event providerSlashed(address indexed provider, address indexed slasher)
+func (_RICRegistry *RICRegistryFilterer) WatchProviderSlashed(opts *bind.WatchOpts, sink chan<- *RICRegistryProviderSlashed, provider []common.Address, slasher []common.Address) (event.Subscription, error) {
 
-	logs, sub, err := _RICRegistry.contract.WatchLogs(opts, "providerSlashed")
+	var providerRule []interface{}
+	for _, providerItem := range provider {
+		providerRule = append(providerRule, providerItem)
+	}
+	var slasherRule []interface{}
+	for _, slasherItem := range slasher {
+		slasherRule = append(slasherRule, slasherItem)
+	}
+
+	logs, sub, err := _RICRegistry.contract.WatchLogs(opts, "providerSlashed", providerRule, slasherRule)
 	if err != nil {
 		return nil, err
 	}
@@ -634,7 +782,7 @@ func (_RICRegistry *RICRegistryFilterer) WatchProviderSlashed(opts *bind.WatchOp
 
 // ParseProviderSlashed is a log parse operation binding the contract event 0x6224637401e13f0bde2c33c63b3f7b896286f5f25c031feced5a2a536b5d4a1a.
 //
-// Solidity: event providerSlashed(address provider, address slasher)
+// Solidity: event providerSlashed(address indexed provider, address indexed slasher)
 func (_RICRegistry *RICRegistryFilterer) ParseProviderSlashed(log types.Log) (*RICRegistryProviderSlashed, error) {
 	event := new(RICRegistryProviderSlashed)
 	if err := _RICRegistry.contract.UnpackLog(event, "providerSlashed", log); err != nil {
@@ -719,10 +867,15 @@ type RICRegistryProviderStaked struct {
 
 // FilterProviderStaked is a free log retrieval operation binding the contract event 0x1736f0c38f824f3c01726a7af14e1f353c3266e388bdfc5ec1e4097d23e9e23e.
 //
-// Solidity: event providerStaked(address provider)
-func (_RICRegistry *RICRegistryFilterer) FilterProviderStaked(opts *bind.FilterOpts) (*RICRegistryProviderStakedIterator, error) {
+// Solidity: event providerStaked(address indexed provider)
+func (_RICRegistry *RICRegistryFilterer) FilterProviderStaked(opts *bind.FilterOpts, provider []common.Address) (*RICRegistryProviderStakedIterator, error) {
 
-	logs, sub, err := _RICRegistry.contract.FilterLogs(opts, "providerStaked")
+	var providerRule []interface{}
+	for _, providerItem := range provider {
+		providerRule = append(providerRule, providerItem)
+	}
+
+	logs, sub, err := _RICRegistry.contract.FilterLogs(opts, "providerStaked", providerRule)
 	if err != nil {
 		return nil, err
 	}
@@ -731,10 +884,15 @@ func (_RICRegistry *RICRegistryFilterer) FilterProviderStaked(opts *bind.FilterO
 
 // WatchProviderStaked is a free log subscription operation binding the contract event 0x1736f0c38f824f3c01726a7af14e1f353c3266e388bdfc5ec1e4097d23e9e23e.
 //
-// Solidity: event providerStaked(address provider)
-func (_RICRegistry *RICRegistryFilterer) WatchProviderStaked(opts *bind.WatchOpts, sink chan<- *RICRegistryProviderStaked) (event.Subscription, error) {
+// Solidity: event providerStaked(address indexed provider)
+func (_RICRegistry *RICRegistryFilterer) WatchProviderStaked(opts *bind.WatchOpts, sink chan<- *RICRegistryProviderStaked, provider []common.Address) (event.Subscription, error) {
 
-	logs, sub, err := _RICRegistry.contract.WatchLogs(opts, "providerStaked")
+	var providerRule []interface{}
+	for _, providerItem := range provider {
+		providerRule = append(providerRule, providerItem)
+	}
+
+	logs, sub, err := _RICRegistry.contract.WatchLogs(opts, "providerStaked", providerRule)
 	if err != nil {
 		return nil, err
 	}
@@ -768,7 +926,7 @@ func (_RICRegistry *RICRegistryFilterer) WatchProviderStaked(opts *bind.WatchOpt
 
 // ParseProviderStaked is a log parse operation binding the contract event 0x1736f0c38f824f3c01726a7af14e1f353c3266e388bdfc5ec1e4097d23e9e23e.
 //
-// Solidity: event providerStaked(address provider)
+// Solidity: event providerStaked(address indexed provider)
 func (_RICRegistry *RICRegistryFilterer) ParseProviderStaked(log types.Log) (*RICRegistryProviderStaked, error) {
 	event := new(RICRegistryProviderStaked)
 	if err := _RICRegistry.contract.UnpackLog(event, "providerStaked", log); err != nil {
@@ -853,10 +1011,15 @@ type RICRegistryProviderUnstaked struct {
 
 // FilterProviderUnstaked is a free log retrieval operation binding the contract event 0xc040f13890127304b60b2a24fa91a0e4877937f8426724681c2d0dfe7ff90207.
 //
-// Solidity: event providerUnstaked(address provider)
-func (_RICRegistry *RICRegistryFilterer) FilterProviderUnstaked(opts *bind.FilterOpts) (*RICRegistryProviderUnstakedIterator, error) {
+// Solidity: event providerUnstaked(address indexed provider)
+func (_RICRegistry *RICRegistryFilterer) FilterProviderUnstaked(opts *bind.FilterOpts, provider []common.Address) (*RICRegistryProviderUnstakedIterator, error) {
 
-	logs, sub, err := _RICRegistry.contract.FilterLogs(opts, "providerUnstaked")
+	var providerRule []interface{}
+	for _, providerItem := range provider {
+		providerRule = append(providerRule, providerItem)
+	}
+
+	logs, sub, err := _RICRegistry.contract.FilterLogs(opts, "providerUnstaked", providerRule)
 	if err != nil {
 		return nil, err
 	}
@@ -865,10 +1028,15 @@ func (_RICRegistry *RICRegistryFilterer) FilterProviderUnstaked(opts *bind.Filte
 
 // WatchProviderUnstaked is a free log subscription operation binding the contract event 0xc040f13890127304b60b2a24fa91a0e4877937f8426724681c2d0dfe7ff90207.
 //
-// Solidity: event providerUnstaked(address provider)
-func (_RICRegistry *RICRegistryFilterer) WatchProviderUnstaked(opts *bind.WatchOpts, sink chan<- *RICRegistryProviderUnstaked) (event.Subscription, error) {
+// Solidity: event providerUnstaked(address indexed provider)
+func (_RICRegistry *RICRegistryFilterer) WatchProviderUnstaked(opts *bind.WatchOpts, sink chan<- *RICRegistryProviderUnstaked, provider []common.Address) (event.Subscription, error) {
 
-	logs, sub, err := _RICRegistry.contract.WatchLogs(opts, "providerUnstaked")
+	var providerRule []interface{}
+	for _, providerItem := range provider {
+		providerRule = append(providerRule, providerItem)
+	}
+
+	logs, sub, err := _RICRegistry.contract.WatchLogs(opts, "providerUnstaked", providerRule)
 	if err != nil {
 		return nil, err
 	}
@@ -902,7 +1070,7 @@ func (_RICRegistry *RICRegistryFilterer) WatchProviderUnstaked(opts *bind.WatchO
 
 // ParseProviderUnstaked is a log parse operation binding the contract event 0xc040f13890127304b60b2a24fa91a0e4877937f8426724681c2d0dfe7ff90207.
 //
-// Solidity: event providerUnstaked(address provider)
+// Solidity: event providerUnstaked(address indexed provider)
 func (_RICRegistry *RICRegistryFilterer) ParseProviderUnstaked(log types.Log) (*RICRegistryProviderUnstaked, error) {
 	event := new(RICRegistryProviderUnstaked)
 	if err := _RICRegistry.contract.UnpackLog(event, "providerUnstaked", log); err != nil {
@@ -988,10 +1156,19 @@ type RICRegistryRollupActivated struct {
 
 // FilterRollupActivated is a free log retrieval operation binding the contract event 0x566940d2cdad4df4f1073f7b1e2e72d9b96d30c5a69432c1432059fcc0c9266f.
 //
-// Solidity: event rollupActivated(uint256 chainID, address provider)
-func (_RICRegistry *RICRegistryFilterer) FilterRollupActivated(opts *bind.FilterOpts) (*RICRegistryRollupActivatedIterator, error) {
+// Solidity: event rollupActivated(uint256 indexed chainID, address indexed provider)
+func (_RICRegistry *RICRegistryFilterer) FilterRollupActivated(opts *bind.FilterOpts, chainID []*big.Int, provider []common.Address) (*RICRegistryRollupActivatedIterator, error) {
 
-	logs, sub, err := _RICRegistry.contract.FilterLogs(opts, "rollupActivated")
+	var chainIDRule []interface{}
+	for _, chainIDItem := range chainID {
+		chainIDRule = append(chainIDRule, chainIDItem)
+	}
+	var providerRule []interface{}
+	for _, providerItem := range provider {
+		providerRule = append(providerRule, providerItem)
+	}
+
+	logs, sub, err := _RICRegistry.contract.FilterLogs(opts, "rollupActivated", chainIDRule, providerRule)
 	if err != nil {
 		return nil, err
 	}
@@ -1000,10 +1177,19 @@ func (_RICRegistry *RICRegistryFilterer) FilterRollupActivated(opts *bind.Filter
 
 // WatchRollupActivated is a free log subscription operation binding the contract event 0x566940d2cdad4df4f1073f7b1e2e72d9b96d30c5a69432c1432059fcc0c9266f.
 //
-// Solidity: event rollupActivated(uint256 chainID, address provider)
-func (_RICRegistry *RICRegistryFilterer) WatchRollupActivated(opts *bind.WatchOpts, sink chan<- *RICRegistryRollupActivated) (event.Subscription, error) {
+// Solidity: event rollupActivated(uint256 indexed chainID, address indexed provider)
+func (_RICRegistry *RICRegistryFilterer) WatchRollupActivated(opts *bind.WatchOpts, sink chan<- *RICRegistryRollupActivated, chainID []*big.Int, provider []common.Address) (event.Subscription, error) {
 
-	logs, sub, err := _RICRegistry.contract.WatchLogs(opts, "rollupActivated")
+	var chainIDRule []interface{}
+	for _, chainIDItem := range chainID {
+		chainIDRule = append(chainIDRule, chainIDItem)
+	}
+	var providerRule []interface{}
+	for _, providerItem := range provider {
+		providerRule = append(providerRule, providerItem)
+	}
+
+	logs, sub, err := _RICRegistry.contract.WatchLogs(opts, "rollupActivated", chainIDRule, providerRule)
 	if err != nil {
 		return nil, err
 	}
@@ -1037,7 +1223,7 @@ func (_RICRegistry *RICRegistryFilterer) WatchRollupActivated(opts *bind.WatchOp
 
 // ParseRollupActivated is a log parse operation binding the contract event 0x566940d2cdad4df4f1073f7b1e2e72d9b96d30c5a69432c1432059fcc0c9266f.
 //
-// Solidity: event rollupActivated(uint256 chainID, address provider)
+// Solidity: event rollupActivated(uint256 indexed chainID, address indexed provider)
 func (_RICRegistry *RICRegistryFilterer) ParseRollupActivated(log types.Log) (*RICRegistryRollupActivated, error) {
 	event := new(RICRegistryRollupActivated)
 	if err := _RICRegistry.contract.UnpackLog(event, "rollupActivated", log); err != nil {
@@ -1125,10 +1311,23 @@ type RICRegistryRollupQueued struct {
 
 // FilterRollupQueued is a free log retrieval operation binding the contract event 0xd470aeaba6a6d85fa12188085bef6f7834d5dee13359db2cf8a255c1825416b2.
 //
-// Solidity: event rollupQueued(uint256 chainID, address provider, uint256 requestedTimestamp, uint256 timeoutTimestamp)
-func (_RICRegistry *RICRegistryFilterer) FilterRollupQueued(opts *bind.FilterOpts) (*RICRegistryRollupQueuedIterator, error) {
+// Solidity: event rollupQueued(uint256 indexed chainID, address indexed provider, uint256 indexed requestedTimestamp, uint256 timeoutTimestamp)
+func (_RICRegistry *RICRegistryFilterer) FilterRollupQueued(opts *bind.FilterOpts, chainID []*big.Int, provider []common.Address, requestedTimestamp []*big.Int) (*RICRegistryRollupQueuedIterator, error) {
 
-	logs, sub, err := _RICRegistry.contract.FilterLogs(opts, "rollupQueued")
+	var chainIDRule []interface{}
+	for _, chainIDItem := range chainID {
+		chainIDRule = append(chainIDRule, chainIDItem)
+	}
+	var providerRule []interface{}
+	for _, providerItem := range provider {
+		providerRule = append(providerRule, providerItem)
+	}
+	var requestedTimestampRule []interface{}
+	for _, requestedTimestampItem := range requestedTimestamp {
+		requestedTimestampRule = append(requestedTimestampRule, requestedTimestampItem)
+	}
+
+	logs, sub, err := _RICRegistry.contract.FilterLogs(opts, "rollupQueued", chainIDRule, providerRule, requestedTimestampRule)
 	if err != nil {
 		return nil, err
 	}
@@ -1137,10 +1336,23 @@ func (_RICRegistry *RICRegistryFilterer) FilterRollupQueued(opts *bind.FilterOpt
 
 // WatchRollupQueued is a free log subscription operation binding the contract event 0xd470aeaba6a6d85fa12188085bef6f7834d5dee13359db2cf8a255c1825416b2.
 //
-// Solidity: event rollupQueued(uint256 chainID, address provider, uint256 requestedTimestamp, uint256 timeoutTimestamp)
-func (_RICRegistry *RICRegistryFilterer) WatchRollupQueued(opts *bind.WatchOpts, sink chan<- *RICRegistryRollupQueued) (event.Subscription, error) {
+// Solidity: event rollupQueued(uint256 indexed chainID, address indexed provider, uint256 indexed requestedTimestamp, uint256 timeoutTimestamp)
+func (_RICRegistry *RICRegistryFilterer) WatchRollupQueued(opts *bind.WatchOpts, sink chan<- *RICRegistryRollupQueued, chainID []*big.Int, provider []common.Address, requestedTimestamp []*big.Int) (event.Subscription, error) {
 
-	logs, sub, err := _RICRegistry.contract.WatchLogs(opts, "rollupQueued")
+	var chainIDRule []interface{}
+	for _, chainIDItem := range chainID {
+		chainIDRule = append(chainIDRule, chainIDItem)
+	}
+	var providerRule []interface{}
+	for _, providerItem := range provider {
+		providerRule = append(providerRule, providerItem)
+	}
+	var requestedTimestampRule []interface{}
+	for _, requestedTimestampItem := range requestedTimestamp {
+		requestedTimestampRule = append(requestedTimestampRule, requestedTimestampItem)
+	}
+
+	logs, sub, err := _RICRegistry.contract.WatchLogs(opts, "rollupQueued", chainIDRule, providerRule, requestedTimestampRule)
 	if err != nil {
 		return nil, err
 	}
@@ -1174,7 +1386,7 @@ func (_RICRegistry *RICRegistryFilterer) WatchRollupQueued(opts *bind.WatchOpts,
 
 // ParseRollupQueued is a log parse operation binding the contract event 0xd470aeaba6a6d85fa12188085bef6f7834d5dee13359db2cf8a255c1825416b2.
 //
-// Solidity: event rollupQueued(uint256 chainID, address provider, uint256 requestedTimestamp, uint256 timeoutTimestamp)
+// Solidity: event rollupQueued(uint256 indexed chainID, address indexed provider, uint256 indexed requestedTimestamp, uint256 timeoutTimestamp)
 func (_RICRegistry *RICRegistryFilterer) ParseRollupQueued(log types.Log) (*RICRegistryRollupQueued, error) {
 	event := new(RICRegistryRollupQueued)
 	if err := _RICRegistry.contract.UnpackLog(event, "rollupQueued", log); err != nil {
@@ -1261,10 +1473,23 @@ type RICRegistryRollupRequested struct {
 
 // FilterRollupRequested is a free log retrieval operation binding the contract event 0x808f5da474ed309cd671fe67f68f30567ab860240c2c2a9449640cdc95b8f7cf.
 //
-// Solidity: event rollupRequested(uint256 chainID, address requester, uint256 timestamp)
-func (_RICRegistry *RICRegistryFilterer) FilterRollupRequested(opts *bind.FilterOpts) (*RICRegistryRollupRequestedIterator, error) {
+// Solidity: event rollupRequested(uint256 indexed chainID, address indexed requester, uint256 indexed timestamp)
+func (_RICRegistry *RICRegistryFilterer) FilterRollupRequested(opts *bind.FilterOpts, chainID []*big.Int, requester []common.Address, timestamp []*big.Int) (*RICRegistryRollupRequestedIterator, error) {
 
-	logs, sub, err := _RICRegistry.contract.FilterLogs(opts, "rollupRequested")
+	var chainIDRule []interface{}
+	for _, chainIDItem := range chainID {
+		chainIDRule = append(chainIDRule, chainIDItem)
+	}
+	var requesterRule []interface{}
+	for _, requesterItem := range requester {
+		requesterRule = append(requesterRule, requesterItem)
+	}
+	var timestampRule []interface{}
+	for _, timestampItem := range timestamp {
+		timestampRule = append(timestampRule, timestampItem)
+	}
+
+	logs, sub, err := _RICRegistry.contract.FilterLogs(opts, "rollupRequested", chainIDRule, requesterRule, timestampRule)
 	if err != nil {
 		return nil, err
 	}
@@ -1273,10 +1498,23 @@ func (_RICRegistry *RICRegistryFilterer) FilterRollupRequested(opts *bind.Filter
 
 // WatchRollupRequested is a free log subscription operation binding the contract event 0x808f5da474ed309cd671fe67f68f30567ab860240c2c2a9449640cdc95b8f7cf.
 //
-// Solidity: event rollupRequested(uint256 chainID, address requester, uint256 timestamp)
-func (_RICRegistry *RICRegistryFilterer) WatchRollupRequested(opts *bind.WatchOpts, sink chan<- *RICRegistryRollupRequested) (event.Subscription, error) {
+// Solidity: event rollupRequested(uint256 indexed chainID, address indexed requester, uint256 indexed timestamp)
+func (_RICRegistry *RICRegistryFilterer) WatchRollupRequested(opts *bind.WatchOpts, sink chan<- *RICRegistryRollupRequested, chainID []*big.Int, requester []common.Address, timestamp []*big.Int) (event.Subscription, error) {
 
-	logs, sub, err := _RICRegistry.contract.WatchLogs(opts, "rollupRequested")
+	var chainIDRule []interface{}
+	for _, chainIDItem := range chainID {
+		chainIDRule = append(chainIDRule, chainIDItem)
+	}
+	var requesterRule []interface{}
+	for _, requesterItem := range requester {
+		requesterRule = append(requesterRule, requesterItem)
+	}
+	var timestampRule []interface{}
+	for _, timestampItem := range timestamp {
+		timestampRule = append(timestampRule, timestampItem)
+	}
+
+	logs, sub, err := _RICRegistry.contract.WatchLogs(opts, "rollupRequested", chainIDRule, requesterRule, timestampRule)
 	if err != nil {
 		return nil, err
 	}
@@ -1310,7 +1548,7 @@ func (_RICRegistry *RICRegistryFilterer) WatchRollupRequested(opts *bind.WatchOp
 
 // ParseRollupRequested is a log parse operation binding the contract event 0x808f5da474ed309cd671fe67f68f30567ab860240c2c2a9449640cdc95b8f7cf.
 //
-// Solidity: event rollupRequested(uint256 chainID, address requester, uint256 timestamp)
+// Solidity: event rollupRequested(uint256 indexed chainID, address indexed requester, uint256 indexed timestamp)
 func (_RICRegistry *RICRegistryFilterer) ParseRollupRequested(log types.Log) (*RICRegistryRollupRequested, error) {
 	event := new(RICRegistryRollupRequested)
 	if err := _RICRegistry.contract.UnpackLog(event, "rollupRequested", log); err != nil {

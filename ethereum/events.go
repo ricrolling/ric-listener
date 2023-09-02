@@ -42,7 +42,7 @@ type L1Addresses struct {
 }
 
 func (l *listener) handleRicRegistryRollUpQueued(chainId *big.Int) error {
-	l.log.Info("rollup queued.", "chainId", chainId)
+	l.log.Info("Handle queued rollup request.", "chainId", chainId)
 	workdir, err := os.MkdirTemp("/tmp", "rollup")
 
 	if err != nil {
@@ -61,7 +61,6 @@ func (l *listener) handleRicRegistryRollUpQueued(chainId *big.Int) error {
 		if err != nil {
 			l.log.Error("error running rollup script", "err", err)
 		}
-
 		l.log.Info("finished running rollup script")
 		close(interrupt)
 	}()

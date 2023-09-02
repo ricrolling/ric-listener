@@ -201,7 +201,9 @@ func (l *listener) getRicRollupRequestedEvent(latestBlock *big.Int) error {
 		addr := common.HexToAddress(log.Topics[2].Hex())
 		ts := log.Topics[3].Big()
 		// l.log.Info("Topic:", "chain", chain.String(), "addr", addr.String(), "ts", ts.String())
+		l.conn.LockAndUpdateOpts()
 		tx, err := l.handleRicRegistryRollUpRequested(chain, addr, ts)
+		l.conn.UnlockOpts()
 
 		if err == NotEnoughStake {
 			l.log.Error("Not enough stake", "chain", chain, "addr", addr, "ts", ts, "tx", tx)
@@ -237,7 +239,9 @@ func (l *listener) getRicRollupQueuedEvent(latestBlock *big.Int) error {
 
 	for _, log := range logs {
 		chain := log.Topics[1].Big()
+		l.conn.LockAndUpdateOpts()
 		l.handleRicRegistryRollUpQueued(chain)
+		l.conn.UnlockOpts()
 	}
 
 	// TODO: spin it up.
