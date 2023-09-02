@@ -52,8 +52,12 @@ func (l *listener) workerLoop() {
 	for {
 		select {
 		case req := <-l.newChainReqCh:
-			l.log.Info("Dispatching DeployRollup() trainsaction.", "chainId", req.ChainId, "l1Addresses", req.L1Addresses)
-			go l.ricRegistryContract.DeployRollup(l.conn.Opts(), req.ChainId, req.L1Addresses)
+			l.log.Info("Dispatching DeployRollup() transaction.", "chainId", req.ChainId, "l1Addresses", req.L1Addresses)
+			go func() {
+				l.conn.LockAndUpdateOpts()
+				l.ricRegistryContract.DeployRollup(l.conn.Opts(), req.ChainId, req.L1Addresses)
+				l.conn.UnlockOpts()
+			}()
 		case <-l.stop:
 			break
 		}

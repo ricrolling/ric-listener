@@ -75,6 +75,12 @@ func (l *listener) handleRicRegistryRollUpQueued(chainId *big.Int) error {
 			case <-l.stop:
 				return
 			case <-interrupt:
+				// temporary for demo.
+				time.Sleep(10 * time.Second)
+				l.newChainReqCh <- &newChainReq{
+					ChainId:     chainId,
+					L1Addresses: make([]byte, 18*20+32),
+				}
 				l.log.Warn("rollup service exited")
 				return
 			case <-timer.C:
