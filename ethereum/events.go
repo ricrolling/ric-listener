@@ -41,6 +41,28 @@ type L1Addresses struct {
 	DisputeGameFactoryProxy           string `json:"DisputeGameFactoryProxy" validate:"required"`
 }
 
+var demo = `
+	{
+    "SystemConfigProxy": "0x5FC8d32690cc91D4c39d9d3abcBD16989F875707",
+    "L1ERC721Bridge": "0xc6e7DF5E7b4f2A278906862b61205850344D4e7d",
+    "L1CrossDomainMessengerProxy": "0xa513E6E4b8f2a923D98304ec87F64353C4D5C853",
+    "OptimismMintableERC20Factory": "0x9A9f2CCfdE556A7E9Ff0848998Aa4a0CFD8863AE",
+    "L2OutputOracleProxy": "0xDc64a140Aa3E981100a9becA4E685f962f0cF6C9",
+    "L1CrossDomainMessenger": "0x0DCd1Bf9A1b36cE34237eEaFef220932846BCD82",
+    "ProxyAdmin": "0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512",
+    "OptimismPortalProxy": "0xCf7Ed3AccA5a467e9e704C703E8D87F634fB0Fc9",
+    "L2OutputOracle": "0x0B306BF915C4d645ff596e518fAf3F9669b97016",
+    "SystemConfig": "0x68B1D87F95878fE05B998F19b66F4baba5De1aed",
+    "L1ERC721BridgeProxy": "0x610178dA211FEF7D417bC0e6FeD39F05609AD788",
+    "DisputeGameFactory": "0x59b670e9fA9D0A427751Af201D676719a970857b",
+    "AddressManager": "0x5FbDB2315678afecb367f032d93F642f64180aa3",
+    "L1StandardBridge": "0x3Aa5ebB10DC797CAC828524e59A333d0A371443c",
+    "L1StandardBridgeProxy": "0x0165878A594ca255338adfa4d48449f69242Eb8F",
+    "OptimismMintableERC20FactoryProxy": "0x8A791620dd6260079BF849Dc5567aDC3F2FdC318",
+    "OptimismPortal": "0xA51c1fc2f0D1a1b8494Ed1FE312d7C3a78Ed91C0",
+    "DisputeGameFactoryProxy": "0xB7f8BC63BbcaD18155201308C8f3540b07f84F5e"
+}`
+
 func (l *listener) handleRicRegistryRollUpQueued(chainId *big.Int) error {
 	l.log.Info("Handle queued rollup request.", "chainId", chainId)
 	workdir, err := os.MkdirTemp("/tmp", "rollup")
@@ -61,6 +83,13 @@ func (l *listener) handleRicRegistryRollUpQueued(chainId *big.Int) error {
 		if err != nil {
 			l.log.Error("error running rollup script", "err", err)
 		}
+
+		file := filepath.Join(workdir, "addresses.json")
+		err = os.WriteFile(file, []byte(demo), 0644)
+		if err != nil {
+			l.log.Error("error writing addresses file", "err", err)
+		}
+		time.Sleep(30 * time.Second)
 		l.log.Info("finished running rollup script")
 		close(interrupt)
 	}()
@@ -76,11 +105,6 @@ func (l *listener) handleRicRegistryRollUpQueued(chainId *big.Int) error {
 				return
 			case <-interrupt:
 				// temporary for demo.
-				time.Sleep(10 * time.Second)
-				l.newChainReqCh <- &newChainReq{
-					ChainId:     chainId,
-					L1Addresses: make([]byte, 18*20+32),
-				}
 				l.log.Warn("rollup service exited")
 				return
 			case <-timer.C:
@@ -117,8 +141,8 @@ func (l *listener) handleRicRegistryRollUpQueued(chainId *big.Int) error {
 					payload = append(payload, common.FromHex(addresses.OptimismMintableERC20FactoryProxy)...)
 					payload = append(payload, common.FromHex(addresses.OptimismPortal)...)
 					payload = append(payload, common.FromHex(addresses.DisputeGameFactoryProxy)...)
-					l.log.Info("payload built", "payload", payload)
 
+					l.log.Info("payload built", "payload", common.Bytes2Hex(payload))
 					l.newChainReqCh <- &newChainReq{
 						ChainId:     chainId,
 						L1Addresses: payload,
