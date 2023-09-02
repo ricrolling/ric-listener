@@ -1,0 +1,10 @@
+{
+    "name": "ric",
+    "id": 31337,
+    "endpoint": "http://localhost:8545",
+    "insecure": true,
+    "from":  "",
+    "keystore_path": "0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80",
+    "block_confirmations": "1",
+    "ric_registry": "0x5fbdb2315678afecb367f032d93f642f64180aa3"
+}
