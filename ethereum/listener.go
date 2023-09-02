@@ -215,7 +215,7 @@ func (l *listener) getRicRollupRequestedEvent(latestBlock *big.Int) error {
 		} else if err != nil {
 			return err
 		}
-		l.log.Info("tx", "tx", tx)
+		l.log.Info("Rollup queued.", "tx", tx)
 	}
 
 	// TODO: spin it up.
