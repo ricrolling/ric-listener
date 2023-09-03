@@ -7,8 +7,8 @@ import (
 	"encoding/json"
 	"fmt"
 	"math/big"
+	"math/rand"
 	"os"
-	"os/exec"
 	"path/filepath"
 	"time"
 
@@ -63,42 +63,75 @@ var demo = `
     "DisputeGameFactoryProxy": "0xB7f8BC63BbcaD18155201308C8f3540b07f84F5e"
 }`
 
+var lineaToml = `
+l1_chain_id = 59140
+l2_chain_id = %d
+l1_rpc = "https://linea-goerli.infura.io/v3/0ff5be6b14cc428f840236cacc7bec71"
+
+deployer_key = "0x5a55e41dd61c93435e6594c19ff31f3af72f466bc36bc02decaa30538e847e2c"
+batcher_account = "0x7730Edfb83212BABe9396064d765a3d5afEc671a"
+batcher_key = "5a55e41dd61c93435e6594c19ff31f3af72f466bc36bc02decaa30538e847e2c"
+proposer_account = "0x7730Edfb83212BABe9396064d765a3d5afEc671a"
+proposer_key = "5a55e41dd61c93435e6594c19ff31f3af72f466bc36bc02decaa30538e847e2c"
+admin_account = "0x7730Edfb83212BABe9396064d765a3d5afEc671a"
+admin_key = "5a55e41dd61c93435e6594c19ff31f3af72f466bc36bc02decaa30538e847e2c"
+p2p_sequencer_account = "0x7730Edfb83212BABe9396064d765a3d5afEc671a"
+p2p_sequencer_key = "5a55e41dd61c93435e6594c19ff31f3af72f466bc36bc02decaa30538e847e2c"`
+
+var letterRunes = []rune("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ")
+
+func RandStringRunes(n int) string {
+	b := make([]rune, n)
+	for i := range b {
+		b[i] = letterRunes[rand.Intn(len(letterRunes))]
+	}
+	return string(b)
+}
+
+func (l *listener) writeConfigToml(path string, chainId *big.Int) error {
+	l.log.Info("writing config toml", "path", path)
+	if err := os.WriteFile(path, []byte(fmt.Sprintf(lineaToml, chainId)), 0777); err != nil {
+		return err
+	}
+	return nil
+}
+
 func (l *listener) handleRicRegistryRollUpQueued(chainId *big.Int) error {
 	l.log.Info("Handle queued rollup request.", "chainId", chainId)
-	workdir, err := os.MkdirTemp("/tmp", "rollup")
+	interrupt := make(chan int)
 
+	workdir, err := os.MkdirTemp("/tmp", "ric")
 	if err != nil {
 		l.log.Error("error creating temp dir", "err", err)
 		return err
 	}
-
-	interrupt := make(chan int)
+	addressesFile := filepath.Join(workdir, "addresses.json")
 
 	go func() {
-		shellCmd := fmt.Sprintf("python rollup.py --workdir %s --chain_id %d 2>&1", workdir, chainId.Uint64())
-		cmd := exec.Command("/bin/zsh", "-c", shellCmd)
-		l.log.Info("Starting roll up service", "cmd", cmd.String())
-		output, err := cmd.Output()
-		l.log.Info("cmd run output:", "output", string(output))
-		if err != nil {
-			l.log.Error("error running rollup script", "err", err)
-		}
-
-		file := filepath.Join(workdir, "addresses.json")
-		err = os.WriteFile(file, []byte(demo), 0644)
+		defer close(interrupt)
+		err = os.WriteFile(addressesFile, []byte(demo), 0644)
 		if err != nil {
 			l.log.Error("error writing addresses file", "err", err)
+			return
 		}
-		time.Sleep(30 * time.Second)
+		l.log.Info("Launching rollup", "chainId", chainId)
+		time.Sleep(60 * time.Second)
+		// shellCmd := fmt.Sprintf("cd /Users/jinsuk/Code/simple-op-stack-rollup/ && python roll.py --name=%s --preset=production --config=./%s l2 &", name, name+".toml")
+		// cmd := exec.Command("/bin/zsh", "-c", shellCmd)
+		// l.log.Info("Starting roll up service", "cmd", cmd.String())
+		// cmd.Stderr = nil
+		// output, err := cmd.CombinedOutput()
+		// l.log.Info("cmd run output:", "output", string(output))
+		// if err != nil {
+		// 	l.log.Error("error running rollup script", "err", err)
+		// 	return
+		// }
 		l.log.Info("finished running rollup script")
-		close(interrupt)
 	}()
 
 	go func() {
-		file := filepath.Join(workdir, "addresses.json")
 		timer := time.NewTimer(5 * time.Second)
 		defer timer.Stop()
-
 		for {
 			select {
 			case <-l.stop:
@@ -108,9 +141,10 @@ func (l *listener) handleRicRegistryRollUpQueued(chainId *big.Int) error {
 				l.log.Warn("rollup service exited")
 				return
 			case <-timer.C:
-				if _, err := os.Stat(file); err == nil {
+				l.log.Info("querying", "path", addressesFile)
+				if _, err := os.Stat(addressesFile); err == nil {
 					l.log.Info("addresses file found, reading...")
-					data, err := os.ReadFile(file)
+					data, err := os.ReadFile(addressesFile)
 					if err != nil {
 						l.log.Error("error reading addresses file", "err", err)
 					}

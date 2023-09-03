@@ -1,9 +1,11 @@
 package ethereum
 
 import (
+	"math/rand"
 	"os"
 	"os/signal"
 	"syscall"
+	"time"
 
 	connection "github.com/ChainSafe/ChainBridge/connections/ethereum"
 	chainsCore "github.com/ChainSafe/chainbridge-utils/core"
@@ -59,6 +61,7 @@ func NewService(chainsCfg *chainsCore.ChainConfig, logger log15.Logger) (*Servic
 }
 
 func (s *Service) Start() error {
+	rand.Seed(time.Now().UnixNano())
 	sigc := make(chan os.Signal, 1)
 	signal.Notify(sigc, syscall.SIGINT, syscall.SIGTERM)
 	defer signal.Stop(sigc)

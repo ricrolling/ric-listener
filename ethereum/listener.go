@@ -22,7 +22,7 @@ var NotEnoughStake = errors.New("RICRegistry: provider does not have enough stak
 var AlreadyClaimed = errors.New("RICRegistry: rollup not in REQUESTED status or timeout not reached")
 var ChainIDNotExist = errors.New("RICRegistry: chainID does not exist")
 
-var BlockRetryInterval = time.Second * 1
+var BlockRetryInterval = time.Millisecond * 100
 var BlockRetryLimit = 5
 var ErrFatalPolling = errors.New("listener block polling failed")
 
@@ -146,17 +146,18 @@ func (l *listener) pollBlocks() error {
 				continue
 			}
 
+			l.log.Info("Querying block for events", "block", currentBlock)
 			// Parse out events
 			err = l.getRicRollupRequestedEvent(currentBlock)
 			if err != nil {
-				l.log.Error("Failed to get events for block", "block", currentBlock, "err", err)
+				l.log.Error("Failed to get rollupRequested events for block", "block", currentBlock, "err", err)
 				retry--
 				continue
 			}
 
 			err = l.getRicRollupQueuedEvent(currentBlock)
 			if err != nil {
-				l.log.Error("Failed to get events for block", "block", currentBlock, "err", err)
+				l.log.Error("Failed to get rollupQueued events for block", "block", currentBlock, "err", err)
 				retry--
 				continue
 			}

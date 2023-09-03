@@ -28,6 +28,7 @@ type Config struct {
 	KeystorePath       string `json:"keystore_path"`
 	BlockConfirmations string `json:"block_confirmations"`
 	RicRegistryAddress string `json:"ric_registry"`
+	StartBlock         string `json:"start_block"`
 }
 
 func readConfig(jsonCfg string) (*chainsCore.ChainConfig, error) {
@@ -46,6 +47,7 @@ func readConfig(jsonCfg string) (*chainsCore.ChainConfig, error) {
 	opts := make(map[string]string)
 	opts[ricEth.RicRegistryOpt] = cfg.RicRegistryAddress
 	opts[ricEth.BlockConfirmationsOpt] = cfg.BlockConfirmations
+	opts[ricEth.StartBlockOpt] = cfg.StartBlock
 
 	return &chainsCore.ChainConfig{
 		Name:         cfg.Name,
