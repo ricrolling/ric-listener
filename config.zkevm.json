@@ -1,0 +1,11 @@
+{
+    "name": "ric",
+    "id": 1442,
+    "endpoint": "https://rpc.public.zkevm-test.net",
+    "insecure": true,
+    "from":  "",
+    "keystore_path": "0x5a55e41dd61c93435e6594c19ff31f3af72f466bc36bc02decaa30538e847e2c",
+    "block_confirmations": "1",
+    "ric_registry": "0xc75a458eFFf7d062d2E5B81145fAbC4952B794E2",
+    "start_block": "5094073"
+}

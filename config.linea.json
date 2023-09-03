@@ -1,0 +1,11 @@
+{
+    "name": "ric",
+    "id": 59140,
+    "endpoint": "https://linea-goerli.infura.io/v3/0ff5be6b14cc428f840236cacc7bec71",
+    "insecure": true,
+    "from":  "",
+    "keystore_path": "0x5a55e41dd61c93435e6594c19ff31f3af72f466bc36bc02decaa30538e847e2c",
+    "block_confirmations": "1",
+    "ric_registry": "0x13Ce9a6d5dd1b9301da30d031dbcB1ef653c5397",
+    "start_block": "1465457"
+}
